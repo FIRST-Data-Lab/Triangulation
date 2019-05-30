@@ -35,7 +35,9 @@ And lastly we delete triangles within the holes or outside the boundary of the r
 \examples{
 # rectangular domain
 bb=rbind(c(0,0),c(1,0),c(1,1),c(0,1))
-VT=TriMesh(bb,2)
+VT=TriMesh(bb,3)
+typeof(VT$V)
+typeof(VT$Tr)
 
 # irregular domain
 data("horseshoe")
