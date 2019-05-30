@@ -67,7 +67,7 @@ TriMesh <- function(Pt,n,H=NULL) {
   }
   tol <- 1e-12
   area <- c()
-  Tr <- as.data.frame(Tr)
+  # Tr <- as.data.frame(Tr)
   for (i in 1:nrow(Tr)) {
     area <- c(area, triarea(V[Tr[i,1],],V[Tr[i,2],],V[Tr[i,3],]))
   }
