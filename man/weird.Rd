@@ -4,11 +4,13 @@
 \name{weird}
 \alias{weird}
 \title{weird}
-\format{\code{weird} is a dataframe with vertices of the boundary of a spiral region.
+\format{
+\code{weird} is a dataframe with vertices of the boundary of a spiral region.
 \describe{
   \item{v1}{The latitudes of the external boundary.}
   \item{v2}{The longtitudes of the external boundary.}
-}}
+}
+}
 \usage{
 data('weird')
 }

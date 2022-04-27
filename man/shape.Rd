@@ -4,11 +4,13 @@
 \name{shape}
 \alias{shape}
 \title{Example from Distmesh (MATLAB)}
-\format{\code{shape} is a dataframe with vertices of the boundary of a polygon region.
+\format{
+\code{shape} is a dataframe with vertices of the boundary of a polygon region.
 \describe{
   \item{v1}{The latitudes of the external boundary.}
   \item{v2}{The longtitudes of the external boundary.}
-}}
+}
+}
 \usage{
 data('shape')
 }
