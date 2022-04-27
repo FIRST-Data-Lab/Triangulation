@@ -1,16 +1,16 @@
 Package: Triangulation
 Type: Package
-Title: Triangulation in 2D domain
-Version: 0.1.0
+Title: Triangulation for 2D domain
+Version: 1.0.0
 Author: Ming-Jun Lai, Li Wang
-Maintainer: Guannan Wang <gwang01@wm.edu>, Jue Wang <juew@iastate.edu>
+Maintainer: Guannan Wang <gwang01@wm.edu>
 Imports:
     pracma,
     tripack
 Depends:
     R (>= 2.10)
-Description: This package can help create triangles mesh by using Delaunay triangulation. 
+Description: This package can help create triangle mesh by using Delaunay triangulation. 
 License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.2

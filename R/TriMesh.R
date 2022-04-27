@@ -23,34 +23,36 @@
 #' And lastly we delete triangles within the holes or outside the boundary of the region.
 #'
 #' @examples
-#' # rectangular domain
-#' bb=rbind(c(0,0),c(1,0),c(1,1),c(0,1))
-#' VT=TriMesh(bb,3)
-#' typeof(VT$V)
-#' typeof(VT$Tr)
+#' # square domain
+#' bb = rbind(c(0,0), c(1,0), c(1,1), c(0,1))
+#' VT = TriMesh(Pt = bb, n = 2)
 #'
 #' # irregular domain
 #' data("horseshoe")
-#' VT=TriMesh(horseshoe,n=8)
+#' VT = TriMesh(Pt = horseshoe, n = 9)
 #'
-#' data('shape')
-#' VT=TriMesh(shape,15)
+#' data("shape")
+#' VT = TriMesh(Pt = shape, n = 15)
 #'
-#' data('weird')
-#' VT=TriMesh(weird,25)
+#' data("weird")
+#' VT = TriMesh(Pt = weird, n = 25)
+#'
+#' data("USbb")
+#' VT = TriMesh(Pt = USbb, n = 15)
 #'
 #' # region with holes
 #' data("BMP")
-#' VT=TriMesh(BMP$bound,25,list(as.matrix(BMP$H1),as.matrix(BMP$H2)))
+#' VT = TriMesh(Pt = BMP$bound, n = 25, H = list(as.matrix(BMP$H1),as.matrix(BMP$H2)))
 #'
 #' data("mymontreal")
-#' VT=TriMesh(mymontreal$bound,25,list(mymontreal$H1,mymontreal$H2))
+#' VT = TriMesh(Pt = mymontreal$bound, n = 25, H = list(mymontreal$H1,mymontreal$H2))
+#'
 #' @export
 
 TriMesh <- function(Pt,n,H=NULL) {
   X <- gridpoly(Pt,n,H)$X
   Y <- gridpoly(Pt,n,H)$Y
-  X[abs(X)<1e-12] <- 0
+  X[abs(X) < 1e-12] <- 0
   Y[abs(Y) < 1e-12] <- 0
   tmp <- cbind(X,Y)
   tmp <- unique(tmp)
@@ -69,7 +71,7 @@ TriMesh <- function(Pt,n,H=NULL) {
   }
   tol <- 1e-12
   area <- c()
-  # Tr <- as.data.frame(Tr)
+  Tr <- as.data.frame(Tr)
   for (i in 1:nrow(Tr)) {
     area <- c(area, triarea(V[Tr[i,1],],V[Tr[i,2],],V[Tr[i,3],]))
   }
