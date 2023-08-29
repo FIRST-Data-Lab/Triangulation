@@ -1,14 +1,15 @@
-#' Create Triangles Mesh in 2D Domains
+#' Mesh generator and Delaunay triangulator for 2D/3D Domains
 #'
 #' This function triangulates the polygonal domain by using Delaunay Triangulation.
 #' @importFrom graphics plot
 #' @importFrom tripack tri.mesh triangles
 #' @importFrom pracma numel isempty meshgrid
-#' @param Pt A two by \code{N} matrix which indicates the outer boundry points of a 2D region.
+#' @importFrom proxy dist
+#' @param bdy A two by \code{N} matrix which indicates the outer boundry points of a 2D region.
 #' @param n An integer parameter controlling the fineness of the triangulation
 #' and subsequent triangulation. As n increases the fineness increases. Usually, \code{n = 8} seems to be a
 #' good choice.
-#' @param H A list of vertices that are the inner boundary points,
+#' @param holes A list of vertices that are the inner boundary points,
 #' default set to '\code{NULL}' if there is no holes.
 #'
 #' @return
@@ -18,67 +19,89 @@
 #' \item{Tr}{a \code{K} by three matrix that each row represents one triangle.
 #' All the elements are the integers that stand for the indices of vertices in \code{V}.}
 #' @details In the function, we firstly get grid points inside and on the boundary of
-#' the polygon with extreme points \code{Pt} and interior holes defined by \code{H}. Then delaunay triangulation
+#' the polygon with extreme points \code{bdy} and interior holes defined by \code{holes}. Then delaunay triangulation
 #' is used to generate triangulations by using the grid points.
 #' And lastly we delete triangles within the holes or outside the boundary of the region.
 #'
 #' @examples
-#' # square domain
-#' bb = rbind(c(0,0), c(1,0), c(1,1), c(0,1))
-#' VT = TriMesh(Pt = bb, n = 2)
+#' # rectangular domain
+#' bb = rbind(c(0, 0), c(1, 0), c(1, 1), c(0, 1))
+#' VT = TriMesh(bb, 3)
+#' typeof(VT$V)
+#' typeof(VT$Tr)
 #'
-#' # irregular domain
+#' # irregular domains
 #' data("horseshoe")
-#' VT = TriMesh(Pt = horseshoe, n = 9)
+#' TriMesh(hs, n = 9)
+#'
+#' pt = rbind(c(-0.475, -0.5), c(0.020, -0.5), c(0.435, -0.5), c(0.890, -0.5),
+#' c(1.345, -0.5), c(1.800, -0.5), c(2.255, -0.5), c(2.710, -0.5), c(3.165, -0.5),
+#' c(-0.475, 0.5), c(0.020, 0.5), c(0.435, 0.5), c(0.890, 0.5), c(1.345, 0.5),
+#' c(1.800, 0.5), c(2.255, 0.5), c(2.710, 0.5), c(3.165, 0.5))
+#' VT = TriMesh(hs, n = 4, pt = pt)
 #'
 #' data("shape")
-#' VT = TriMesh(Pt = shape, n = 15)
+#' TriMesh(shape, 15)
 #'
 #' data("weird")
-#' VT = TriMesh(Pt = weird, n = 25)
+#' TriMesh(weird, 30)
 #'
 #' data("USbb")
-#' VT = TriMesh(Pt = USbb, n = 15)
+#' TriMesh(USbb, 15)
 #'
-#' # region with holes
+#' # domains with holes
 #' data("BMP")
-#' VT = TriMesh(Pt = BMP$bound, n = 25, H = list(as.matrix(BMP$H1),as.matrix(BMP$H2)))
+#' TriMesh(BMP$bound, 25, holes = list(as.matrix(BMP$H1), as.matrix(BMP$H2)))
 #'
 #' data("mymontreal")
-#' VT = TriMesh(Pt = mymontreal$bound, n = 25, H = list(mymontreal$H1,mymontreal$H2))
-#'
+#' TriMesh(mymontreal$bound, 25, holes = list(mymontreal$H1, mymontreal$H2))
 #' @export
 
-TriMesh <- function(Pt,n,H=NULL) {
-  X <- gridpoly(Pt,n,H)$X
-  Y <- gridpoly(Pt,n,H)$Y
+TriMesh <- function(bdy, n, pt = NULL, holes = NULL) {
+  X <- gridpoly(bdy, n, holes)$X
+  Y <- gridpoly(bdy, n, holes)$Y
   X[abs(X) < 1e-12] <- 0
   Y[abs(Y) < 1e-12] <- 0
-  tmp <- cbind(X,Y)
+  tmp <- cbind(X, Y)
   tmp <- unique(tmp)
-  X <- tmp[,1]
-  Y <- tmp[,2]
-  tt <- tri.mesh(X,Y)
-  Tr <- triangles(tt)[,1:3]
+  if(!is.null(pt)){
+    sx = abs(tmp[nrow(tmp), 1] - tmp[nrow(tmp)-1, 1])
+    sy = abs(tmp[nrow(tmp), 2] - tmp[nrow(tmp)-1, 2])
+    dat1 = data.frame(X = c(pt[, 1]), Y = c(pt[, 2]))
+    dat2 = data.frame(X = c(tmp[, 1]), Y = c(tmp[, 2]))
+    dis = dist(dat1, dat2, method = "euclidean")
+    # ind = which(dis < sqrt(sx^2 + sy^2), arr.ind = TRUE)
+    ind = which(dis < max(sx, sy), arr.ind = TRUE)
+    ind.del = unique(ind[, 2])
+    # points(tmp[ind.del, ], pch = 20, col = 2)
+    X <- c(pt[, 1], tmp[-ind.del, 1])
+    Y <- c(pt[, 2], tmp[-ind.del, 2])
+  }else{
+    X <- tmp[, 1]
+    Y <- tmp[, 2]
+  }
+
+  tt <- tri.mesh(X, Y)
+  Tr <- triangles(tt)[, 1:3]
   Tr <- as.matrix(Tr)
-  V <- cbind(X,Y)
-  Tr <- del_tri(Pt,V,Tr,1)$NewTr
+  V <- cbind(X, Y)
+  Tr <- del_tri(bdy, V, Tr, 1)$NewTr
   Tr <- as.matrix(Tr)
-  if (!isempty(H)) {
-    for (i in 1:numel(H)) {
-      Tr <- del_tri(H[[i]],V,Tr,-1)$NewTr
+  if (!isempty(holes)) {
+    for (i in 1:numel(holes)) {
+      Tr <- del_tri(holes[[i]], V, Tr, -1)$NewTr
     }
   }
-  tol <- 1e-12
+
   area <- c()
-  Tr <- as.data.frame(Tr)
+  # Tr <- as.data.frame(Tr)
   for (i in 1:nrow(Tr)) {
-    area <- c(area, triarea(V[Tr[i,1],],V[Tr[i,2],],V[Tr[i,3],]))
+    area <- c(area, triarea(V[Tr[i, 1], ], V[Tr[i, 2], ], V[Tr[i, 3], ]))
   }
-  dT <- which(area<tol)
+  dT <- which(area < 1e-12)
   if (length(dT) > 0) {
-    Tr<-Tr[-dT,]
+    Tr <- Tr[-dT, ]
   }
-  TriPlot(V,Tr)
-  return(list(V = V,Tr = Tr))
+  TriPlot(V, Tr)
+  return(list(V = V, Tr = Tr))
 }
