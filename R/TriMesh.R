@@ -65,11 +65,12 @@ TriMesh <- function(bdy, n, pt = NULL, holes = NULL) {
   tmp <- cbind(X, Y)
   tmp <- unique(tmp)
   if(!is.null(pt)){
-    sx = abs(tmp[nrow(tmp), 1] - tmp[nrow(tmp)-1, 1])
-    sy = abs(tmp[nrow(tmp), 2] - tmp[nrow(tmp)-1, 2])
+    tmp1 = sort(unique(X)); tmp2 = sort(unique(Y));
+    sx = tmp1[2] - tmp1[1]
+    sy = tmp2[2] - tmp2[1]
     dat1 = data.frame(X = c(pt[, 1]), Y = c(pt[, 2]))
     dat2 = data.frame(X = c(tmp[, 1]), Y = c(tmp[, 2]))
-    dis = dist(dat1, dat2, method = "euclidean")
+    dis = proxy::dist(dat1, dat2, method = "euclidean")
     # ind = which(dis < sqrt(sx^2 + sy^2), arr.ind = TRUE)
     ind = which(dis < max(sx, sy), arr.ind = TRUE)
     ind.del = unique(ind[, 2])
