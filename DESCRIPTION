@@ -2,7 +2,7 @@ Package: Triangulation
 Type: Package
 Title: Triangulation for 2D domain
 Version: 1.0.0
-Author: Ming-Jun Lai, Jue Wang, Li Wang
+Author: Jue Wang, Ming-Jun Lai, Li Wang
 Maintainer: Guannan Wang <gwang01@wm.edu>
 Imports:
     pracma,
